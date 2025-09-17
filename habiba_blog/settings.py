@@ -12,21 +12,25 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-# ALLOWED_HOSTS configuration - Updated for Render
+# ALLOWED_HOSTS configuration - Updated for Railway
 ALLOWED_HOSTS = []
 
-# Check if we're on Render
-if 'RENDER' in os.environ:
-    # Render production
+# Check if we're on Railway
+if 'RAILWAY_ENVIRONMENT' in os.environ:
+    # Railway production
     ALLOWED_HOSTS = [
-        'hasilinvest.ca', 
-        'www.hasilinvest.ca', 
-        '.onrender.com',  # Changed from Railway to Render
-        '.render.com'
+        "hasilinvest.ca",
+        "www.hasilinvest.ca",
+        ".railway.app",
+        ".up.railway.app"
     ]
-elif 'RAILWAY_ENVIRONMENT' in os.environ:
-    # Keep Railway config for backup/migration
-    ALLOWED_HOSTS = ['hasilinvest.ca', 'www.hasilinvest.ca', '.railway.app', '.up.railway.app']
+elif 'RENDER' in os.environ:
+    # Keep Render config for backup
+    ALLOWED_HOSTS = [
+        "hasilinvest.ca", 
+        "www.hasilinvest.ca", 
+        "hsinvest.onrender.com"
+    ]
 else:
     # Local development
     ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver', '*']
@@ -105,7 +109,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'habiba_blog.wsgi.application'
 
-# Database (PostgreSQL) - Updated for Render
+# Database (PostgreSQL) - Updated for Railway
 if 'DATABASE_URL' in os.environ:
     DATABASES = {
         'default': dj_database_url.parse(
@@ -154,12 +158,12 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Platform-specific static file serving
-if 'RENDER' in os.environ:
-    # Render-specific configuration
+if 'RAILWAY_ENVIRONMENT' in os.environ:
+    # Railway-specific static file serving
     WHITENOISE_USE_FINDERS = True
     WHITENOISE_AUTOREFRESH = True
-elif 'RAILWAY_ENVIRONMENT' in os.environ:
-    # Railway-specific static file serving
+elif 'RENDER' in os.environ:
+    # Render-specific configuration
     WHITENOISE_USE_FINDERS = True
     WHITENOISE_AUTOREFRESH = True
 
@@ -198,8 +202,8 @@ RECAPTCHA_PRIVATE_KEY = config('RECAPTCHA_PRIVATE_KEY', default='')
 # Google Analytics
 GOOGLE_ANALYTICS_ID = config('GOOGLE_ANALYTICS_ID', default='')
 
-# Security Settings (for production) - Updated for Render
-in_production = not DEBUG and ('RENDER' in os.environ or 'RAILWAY_ENVIRONMENT' in os.environ)
+# Security Settings (for production) - Updated for Railway
+in_production = not DEBUG and ('RAILWAY_ENVIRONMENT' in os.environ or 'RENDER' in os.environ)
 
 if in_production:
     # Basic security headers
@@ -217,7 +221,7 @@ if in_production:
         SECURE_HSTS_SECONDS = 31536000
         SECURE_HSTS_PRELOAD = True
     
-    # Trust proxy headers (works for both Render and Railway)
+    # Trust proxy headers (works for both Railway and Render)
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     USE_TZ = True
 
@@ -271,17 +275,17 @@ LOGGING = {
 }
 
 # Platform-specific settings
-if 'RENDER' in os.environ:
-    # Render-specific settings
-    PORT = int(os.environ.get('PORT', 10000))  # Render uses port 10000 by default
+if 'RAILWAY_ENVIRONMENT' in os.environ:
+    # Railway-specific settings
+    PORT = int(os.environ.get('PORT', 8000))
     SECURE_REFERRER_POLICY = 'same-origin'
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     LOGGING['root']['level'] = 'INFO'
     LOGGING['loggers']['django']['level'] = 'INFO'
     
-elif 'RAILWAY_ENVIRONMENT' in os.environ:
-    # Railway-specific settings (keep for migration purposes)
-    PORT = int(os.environ.get('PORT', 8000))
+elif 'RENDER' in os.environ:
+    # Render-specific settings (keep for backup)
+    PORT = int(os.environ.get('PORT', 10000))
     SECURE_REFERRER_POLICY = 'same-origin'
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     LOGGING['root']['level'] = 'INFO'
